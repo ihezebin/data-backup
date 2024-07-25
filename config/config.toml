@@ -1,0 +1,40 @@
+service_name = "data-backup"
+port = 8080
+# 每天凌晨 3 点
+default_cron = "0 3 * * * *"
+
+[logger]
+    level = "info"
+    filename = "log/data-backup.log"
+
+[email]
+    host="smtp.qq.com"
+    port=587
+    username="ihezebin@qq.com"
+    password="xxxxx"
+
+[[mongo_sources]]
+    key = "blog"
+    dsn = "mongodb://root:root@mongo-sts-0.mongo.default:27017,mongo-sts-1.mongo.default:27017/blog?authSource=admin&replicaSet=hezebin"
+    collections = ["article", "tag", "draft", "comment"]
+
+[[oss_targets]]
+    key = "cos"
+    dsn = "cos://xxx:xxx@cos.ap-chengdu.myqcloud.com/hezebin-1258606727"
+    dir = "backup"
+
+
+[[tasks]]
+    id = "664c72b790d71012f2753739"
+    cron = "0 1 * * * *"
+    source_type = "mongo"
+    source_key = "blog"
+    target_type = "oss"
+    target_key = "cos"
+
+
+#[redis_nodes]
+#    addrs = ["127.0.0.1:6379"]
+#    password = "root"
+#addrs = ["redis-sts-0.redis.default:7000", "redis-sts-1.redis.default:7000", "redis-sts-2.redis.default:7000"]
+#password = "root"

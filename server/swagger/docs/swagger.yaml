@@ -1,0 +1,69 @@
+basePath: /
+definitions:
+  dto.RestoreByTaskReq:
+    properties:
+      task_id:
+        type: string
+    type: object
+  dto.RestoreByTaskResp:
+    properties:
+      task:
+        $ref: '#/definitions/task.Task'
+    type: object
+  server.Body:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+    type: object
+  task.Task:
+    properties:
+      cron:
+        type: string
+      id:
+        type: string
+      source_key:
+        type: string
+      source_type:
+        type: string
+      target_key:
+        type: string
+      target_type:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: 这是一个使用 Gin 和 Swagger 生成 API 文档的示例。
+  title: Go Template DDD 示例 API 文档
+  version: "1.0"
+paths:
+  /restore/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务参数
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RestoreByTaskReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时如下结构；错误时 code 非 0, message 包含错误信息, 不包含 data
+          schema:
+            allOf:
+            - $ref: '#/definitions/server.Body'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.RestoreByTaskResp'
+              type: object
+      summary: 通过备份任务来恢复数据
+      tags:
+      - restore
+swagger: "2.0"

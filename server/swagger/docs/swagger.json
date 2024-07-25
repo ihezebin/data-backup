@@ -1,0 +1,111 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "这是一个使用 Gin 和 Swagger 生成 API 文档的示例。",
+        "title": "Go Template DDD 示例 API 文档",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/restore/login": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "restore"
+                ],
+                "summary": "通过备份任务来恢复数据",
+                "parameters": [
+                    {
+                        "description": "任务参数",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RestoreByTaskReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功时如下结构；错误时 code 非 0, message 包含错误信息, 不包含 data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/server.Body"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.RestoreByTaskResp"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dto.RestoreByTaskReq": {
+            "type": "object",
+            "properties": {
+                "task_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.RestoreByTaskResp": {
+            "type": "object",
+            "properties": {
+                "task": {
+                    "$ref": "#/definitions/task.Task"
+                }
+            }
+        },
+        "server.Body": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {},
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "task.Task": {
+            "type": "object",
+            "properties": {
+                "cron": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "source_key": {
+                    "type": "string"
+                },
+                "source_type": {
+                    "type": "string"
+                },
+                "target_key": {
+                    "type": "string"
+                },
+                "target_type": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
