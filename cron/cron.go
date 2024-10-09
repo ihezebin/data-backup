@@ -32,30 +32,10 @@ func Run(ctx context.Context) error {
 
 			logger.Infof(ctx, "task start, task: %+v", _task)
 
-			source := _task.GetSource()
-			if source == nil {
-				err = errors.Errorf("task source is nil")
-				return
-			}
-
-			target := _task.GetTarget()
-			if target == nil {
-				err = errors.Errorf("task target is nil")
-				return
-			}
-
-			data, err := source.Export(ctx)
+			err = _task.Source.Backup(ctx, _task.Target)
 			if err != nil {
-				err = errors.Wrapf(err, "source export error")
+				err = errors.Wrapf(err, "source backup error, task: %+v", _task)
 				return
-			}
-
-			for _, datum := range data {
-				err = target.Store(ctx, datum.Key, datum.Content)
-				if err != nil {
-					err = errors.Wrapf(err, "target store error, key: %s", _task.TargetKey)
-					return
-				}
 			}
 
 			logger.Infof(ctx, "task success, task: %+v", _task)

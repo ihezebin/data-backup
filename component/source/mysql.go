@@ -3,6 +3,7 @@ package source
 import (
 	"context"
 	"data-backup/component/storage"
+	"data-backup/component/target"
 	"path"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 )
 
 type MysqlSource struct {
+	Key    string   `json:"key" mapstructure:"key"`
 	DSN    string   `json:"dsn" mapstructure:"dsn"`
 	Tables []string `json:"tables" mapstructure:"tables"`
 	DB     *gorm.DB
@@ -20,11 +22,11 @@ type MysqlSource struct {
 
 var _ Source = (*MysqlSource)(nil)
 
-func (s *MysqlSource) Export(ctx context.Context) ([]Data, error) {
-	return nil, errors.New("mysql export not supported")
+func (s *MysqlSource) Backup(ctx context.Context, target2 target.Target) error {
+	return errors.New("mysql export not supported")
 }
 
-func (s *MysqlSource) Import(ctx context.Context, data Data) error {
+func (s *MysqlSource) Restore(ctx context.Context, target target.Target) error {
 	return errors.New("mysql import not supported")
 }
 
@@ -37,9 +39,7 @@ func (s *MysqlSource) Keys() []string {
 	return keys
 }
 
-var key2MysqlSourceTable = make(map[string]*MysqlSource)
-
-func InitMysqlSources(ctx context.Context, sources []*MysqlSource) error {
+func RegisterMysqlSources(_ context.Context, sources []*MysqlSource) error {
 	for _, source := range sources {
 		dsn := source.DSN
 		mysqlDsn, err := storage.ParseMysqlDSN(dsn)
@@ -65,11 +65,8 @@ func InitMysqlSources(ctx context.Context, sources []*MysqlSource) error {
 		source.DB = db
 
 		source.DBName = mysqlDsn.DBName
-		key2MysqlSourceTable[source.DSN] = source
+
+		registerSource(source.Key, source)
 	}
 	return nil
-}
-
-func GetMysqlSource(key string) *MysqlSource {
-	return key2MysqlSourceTable[key]
 }

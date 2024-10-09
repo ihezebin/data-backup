@@ -2,6 +2,7 @@ package source
 
 import (
 	"context"
+	"data-backup/component/target"
 	"encoding/json"
 	"net/url"
 	"path"
@@ -21,9 +22,7 @@ type MongoSource struct {
 	Client      *mongo.Client
 }
 
-var key2MongoSourceTable = make(map[string]*MongoSource)
-
-func InitMongoSources(ctx context.Context, sources []*MongoSource) error {
+func RegisterMongoSources(ctx context.Context, sources []*MongoSource) error {
 	for _, source := range sources {
 		dsn := source.DSN
 		u, err := url.Parse(dsn)
@@ -48,77 +47,71 @@ func InitMongoSources(ctx context.Context, sources []*MongoSource) error {
 		source.DB = dbName
 		source.Client = client
 
-		key2MongoSourceTable[source.Key] = source
+		registerSource(source.Key, source)
 	}
 	return nil
 }
 
-func GetMongoSource(key string) *MongoSource {
-	return key2MongoSourceTable[key]
-}
-
 var _ Source = (*MongoSource)(nil)
 
-func (s *MongoSource) Export(ctx context.Context) ([]Data, error) {
-	data := make([]Data, 0)
+func (s *MongoSource) Backup(ctx context.Context, target target.Target) error {
 	db := s.Client.Database(s.DB)
 	for _, collection := range s.Collections {
 		cur, err := db.Collection(collection).Find(ctx, bson.M{})
 		if err != nil {
-			return nil, errors.Wrapf(err, "mongo find error, collection: %s", collection)
+			return errors.Wrapf(err, "mongo find error, collection: %s", collection)
 		}
 
 		docs := make([]map[string]interface{}, 0)
 		if err = cur.All(ctx, &docs); err != nil {
-			return nil, errors.Wrapf(err, "mongo decode error, collection: %s", collection)
+			return errors.Wrapf(err, "mongo decode error, collection: %s", collection)
 		}
 
 		collData, err := json.Marshal(docs)
 		if err != nil {
-			return nil, errors.Wrapf(err, "mongo marshal error, collection: %s", collection)
+			return errors.Wrapf(err, "mongo marshal error, collection: %s", collection)
 		}
 
-		data = append(data, Data{
-			Key:     path.Join(s.DB, collection),
-			Content: collData,
-		})
+		err = target.Import(ctx, path.Join(s.DB, collection), collData)
+		if err != nil {
+			return errors.Wrapf(err, "target import error, collection: %s", collection)
+		}
+
 	}
-	return data, nil
+	return nil
 }
 
-func (s *MongoSource) Keys() []string {
-	keys := make([]string, 0)
+func (s *MongoSource) Restore(ctx context.Context, target target.Target) error {
+	db := s.Client.Database(s.DB)
 
 	for _, collection := range s.Collections {
-		keys = append(keys, path.Join(s.DB, collection))
-	}
-	return keys
-}
-
-func (s *MongoSource) Import(ctx context.Context, data Data) error {
-	db := s.Client.Database(s.DB)
-	coll := db.Collection(data.Key)
-	tempDocs := make([]map[string]interface{}, 0)
-	err := json.Unmarshal(data.Content, &tempDocs)
-	if err != nil {
-		return errors.Wrapf(err, "mongo unmarshal error, collection: %s", data.Key)
-	}
-
-	if len(tempDocs) == 0 {
-		return nil
-	}
-
-	docs := make([]interface{}, 0)
-	for _, doc := range tempDocs {
-		docs = append(docs, doc)
-	}
-
-	opts := options.Replace().SetUpsert(true)
-	for _, doc := range docs {
-		_, err = coll.ReplaceOne(ctx, doc, doc, opts)
+		exportData, err := target.Export(ctx, path.Join(s.DB, collection))
 		if err != nil {
-			return errors.Wrapf(err, "mongo insert error, collection: %s, doc: %+v", data.Key, doc)
+			return errors.Wrapf(err, "target export error, collection: %s", collection)
+		}
+		tempDocs := make([]map[string]interface{}, 0)
+		err = json.Unmarshal(exportData, &tempDocs)
+		if err != nil {
+			return errors.Wrapf(err, "mongo unmarshal error, collection: %s", collection)
+		}
+		if len(tempDocs) == 0 {
+			return nil
+		}
+
+		docs := make([]interface{}, 0)
+		for _, doc := range tempDocs {
+			docs = append(docs, doc)
+		}
+
+		coll := db.Collection(collection)
+		opts := options.Replace().SetUpsert(true)
+		for _, doc := range docs {
+			_, err = coll.ReplaceOne(ctx, doc, doc, opts)
+			if err != nil {
+				return errors.Wrapf(err, "mongo insert error, collection: %s, doc: %+v", collection, doc)
+			}
 		}
 	}
+
 	return nil
 }

@@ -99,20 +99,20 @@ func initComponents(ctx context.Context, conf *config.Config) error {
 	}
 
 	// init sources
-	if err := source.InitMongoSources(ctx, conf.MongoSources); err != nil {
+	if err := source.RegisterMongoSources(ctx, conf.MongoSources); err != nil {
 		return errors.Wrap(err, "init mongo sources error")
 	}
-	if err := source.InitMysqlSources(ctx, conf.MysqlSources); err != nil {
+	if err := source.RegisterMysqlSources(ctx, conf.MysqlSources); err != nil {
 		return errors.Wrap(err, "init mongo sources error")
 	}
 
 	// init targets
-	if err := target.InitOSSTargets(ctx, conf.OSSTargets); err != nil {
+	if err := target.RegisterOSSTargets(ctx, conf.OSSTargets); err != nil {
 		return errors.Wrap(err, "init oss targets error")
 	}
 
 	// init tasks
-	if err := task.InitTasks(ctx, conf.DefaultCron, conf.Tasks); err != nil {
+	if err := task.RegisterTasks(ctx, conf.DefaultCron, conf.Tasks); err != nil {
 		return errors.Wrap(err, "init tasks error")
 	}
 

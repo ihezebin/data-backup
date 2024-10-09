@@ -17,30 +17,22 @@ type OSSTarget struct {
 	Client oss.Client
 }
 
-var key2OSSTargetTable = make(map[string]*OSSTarget)
-
-func GetOSSTarget(key string) *OSSTarget {
-	return key2OSSTargetTable[key]
-}
-
-func InitOSSTargets(ctx context.Context, targets []*OSSTarget) error {
+func RegisterOSSTargets(_ context.Context, targets []*OSSTarget) error {
 	for _, target := range targets {
 		client, err := oss.NewClient(target.Dsn)
 		if err != nil {
 			return errors.Wrap(err, "create oss client error")
 		}
-		key2OSSTargetTable[target.Key] = &OSSTarget{
-			Dsn:    target.Dsn,
-			Dir:    target.Dir,
-			Client: client,
-		}
+
+		target.Client = client
+		registerTarget(target.Key, target)
 	}
 	return nil
 }
 
 var _ Target = (*OSSTarget)(nil)
 
-func (t *OSSTarget) Store(ctx context.Context, key string, data []byte) error {
+func (t *OSSTarget) Import(ctx context.Context, key string, data []byte) error {
 	name := path.Join(t.Dir, key)
 	err := t.Client.PutObject(ctx, name, bytes.NewBuffer(data))
 	if err != nil {
@@ -50,7 +42,7 @@ func (t *OSSTarget) Store(ctx context.Context, key string, data []byte) error {
 	return nil
 }
 
-func (t *OSSTarget) Restore(ctx context.Context, key string) ([]byte, error) {
+func (t *OSSTarget) Export(ctx context.Context, key string) ([]byte, error) {
 	name := path.Join(t.Dir, key)
 	object, err := t.Client.GetObject(ctx, name)
 	if err != nil {

@@ -14,12 +14,16 @@ default_cron = "0 3 * * * *"
     password="xxxxx"
 
 [[mongo_sources]]
-    key = "blog"
-    dsn = "mongodb://root:root@mongo-sts-0.mongo.default:27017,mongo-sts-1.mongo.default:27017/blog?authSource=admin&replicaSet=hezebin"
+    key = "mongo:blog"
+    dsn = "mongodb://root:root@127.0.0.1:27017/blog?authSource=admin"
     collections = ["article", "tag", "draft", "comment"]
+#[[mysql_sources]]
+#    key = "blog"
+#    dsn = "root:root@tcp(mysql-service:3306)/blog?charset=utf8mb4&parseTime=True&loc=Local"
+#    collections = ["article", "tag", "draft", "comment"]
 
 [[oss_targets]]
-    key = "cos"
+    key = "cos:hezebin:backup"
     dsn = "cos://xxx:xxx@cos.ap-chengdu.myqcloud.com/hezebin-1258606727"
     dir = "backup"
 
@@ -27,10 +31,8 @@ default_cron = "0 3 * * * *"
 [[tasks]]
     id = "664c72b790d71012f2753739"
     cron = "0 1 * * * *"
-    source_type = "mongo"
-    source_key = "blog"
-    target_type = "oss"
-    target_key = "cos"
+    source_key = "mongo:blog"
+    target_key = "cos:hezebin:backup"
 
 
 #[redis_nodes]

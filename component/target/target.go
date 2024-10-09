@@ -4,15 +4,17 @@ import (
 	"context"
 )
 
-const (
-	TypeOss = "oss"
-)
-
-var SupportTargetTypes = map[string]struct{}{
-	TypeOss: {},
+type Target interface {
+	Import(ctx context.Context, key string, data []byte) error
+	Export(ctx context.Context, key string) ([]byte, error)
 }
 
-type Target interface {
-	Store(ctx context.Context, key string, data []byte) error
-	Restore(ctx context.Context, sourceKey string) ([]byte, error)
+var key2TargetTable = make(map[string]Target)
+
+func registerTarget(key string, target Target) {
+	key2TargetTable[key] = target
+}
+
+func GetTarget(key string) Target {
+	return key2TargetTable[key]
 }

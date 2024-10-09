@@ -2,25 +2,20 @@ package source
 
 import (
 	"context"
+	"data-backup/component/target"
 )
-
-const (
-	TypeMongoDB = "mongo"
-	TypeMysql   = "mysql"
-)
-
-var SupportSourceTypes = map[string]struct{}{
-	TypeMongoDB: {},
-	TypeMysql:   {},
-}
-
-type Data struct {
-	Key     string
-	Content []byte
-}
 
 type Source interface {
-	Export(ctx context.Context) ([]Data, error)
-	Import(ctx context.Context, data Data) error
-	Keys() []string
+	Backup(ctx context.Context, target target.Target) error
+	Restore(ctx context.Context, target target.Target) error
+}
+
+var key2SourceTable = make(map[string]Source)
+
+func registerSource(key string, source Source) {
+	key2SourceTable[key] = source
+}
+
+func GetSource(key string) Source {
+	return key2SourceTable[key]
 }
