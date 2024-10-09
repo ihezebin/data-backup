@@ -12,10 +12,10 @@ type Task struct {
 	Id   string `json:"id" mapstructure:"id"`
 	Cron string `json:"cron" mapstructure:"cron"`
 
-	SourceKey string `json:"source_key" mapstructure:"source_key"`
-	TargetKey string `json:"target_key" mapstructure:"target_key"`
-	Source    source.Source
-	Target    target.Target
+	SourceId string `json:"source_id" mapstructure:"source_id"`
+	TargetId string `json:"target_id" mapstructure:"target_id"`
+	Source   source.Source
+	Target   target.Target
 }
 
 var tasks = make([]*Task, 0)
@@ -25,17 +25,17 @@ func RegisterTasks(_ context.Context, defaultCron string, originTasks []*Task) e
 		if task.Cron == "" {
 			task.Cron = defaultCron
 		}
-		if task.SourceKey == "" || task.TargetKey == "" {
+		if task.SourceId == "" || task.TargetId == "" {
 			return errors.New("task source or target is empty")
 		}
 
-		_source := source.GetSource(task.SourceKey)
+		_source := source.GetSource(task.SourceId)
 		if _source == nil {
-			return errors.Errorf("source not found, source_key: %s", task.SourceKey)
+			return errors.Errorf("source not found, source_id: %s", task.SourceId)
 		}
-		_target := target.GetTarget(task.TargetKey)
+		_target := target.GetTarget(task.TargetId)
 		if _target == nil {
-			return errors.Errorf("target not found, target_key: %s", task.TargetKey)
+			return errors.Errorf("target not found, target_id: %s", task.TargetId)
 		}
 
 		task.Source = _source

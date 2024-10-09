@@ -99,16 +99,12 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "source_key": {
+                "source": {},
+                "source_id": {
                     "type": "string"
                 },
-                "source_type": {
-                    "type": "string"
-                },
-                "target_key": {
-                    "type": "string"
-                },
-                "target_type": {
+                "target": {},
+                "target_id": {
                     "type": "string"
                 }
             }

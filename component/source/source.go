@@ -10,12 +10,12 @@ type Source interface {
 	Restore(ctx context.Context, target target.Target) error
 }
 
-var key2SourceTable = make(map[string]Source)
+var id2SourceTable = make(map[string]Source)
 
 func registerSource(key string, source Source) {
-	key2SourceTable[key] = source
+	id2SourceTable[key] = source
 }
 
-func GetSource(key string) Source {
-	return key2SourceTable[key]
+func GetSource(id string) Source {
+	return id2SourceTable[id]
 }

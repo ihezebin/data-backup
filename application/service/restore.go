@@ -36,7 +36,7 @@ func (svc *RestoreApplicationService) RestoreByTask(ctx context.Context, req *dt
 	err := _task.Source.Restore(ctx, _task.Target)
 	if err != nil {
 		svc.logger.Errorf(ctx, "restore error, task: %+v, err: %v", _task, err)
-		return nil, httpserver.ErrorWithInternalServer()
+		return nil, httpserver.NewError(httpserver.CodeInternalServerError, err.Error())
 	}
 
 	return &dto.RestoreByTaskResp{

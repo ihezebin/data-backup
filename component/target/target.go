@@ -7,14 +7,19 @@ import (
 type Target interface {
 	Import(ctx context.Context, key string, data []byte) error
 	Export(ctx context.Context, key string) ([]byte, error)
+	ExportMulti(ctx context.Context, prefix string) ([]Data, error)
+}
+type Data struct {
+	Key  string
+	Data []byte
 }
 
-var key2TargetTable = make(map[string]Target)
+var id2TargetTable = make(map[string]Target)
 
 func registerTarget(key string, target Target) {
-	key2TargetTable[key] = target
+	id2TargetTable[key] = target
 }
 
-func GetTarget(key string) Target {
-	return key2TargetTable[key]
+func GetTarget(id string) Target {
+	return id2TargetTable[id]
 }

@@ -13,7 +13,7 @@ import (
 )
 
 type MysqlSource struct {
-	Key    string   `json:"key" mapstructure:"key"`
+	Id     string   `json:"id" mapstructure:"id"`
 	DSN    string   `json:"dsn" mapstructure:"dsn"`
 	Tables []string `json:"tables" mapstructure:"tables"`
 	DB     *gorm.DB
@@ -66,7 +66,7 @@ func RegisterMysqlSources(_ context.Context, sources []*MysqlSource) error {
 
 		source.DBName = mysqlDsn.DBName
 
-		registerSource(source.Key, source)
+		registerSource(source.Id, source)
 	}
 	return nil
 }

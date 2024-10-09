@@ -15,7 +15,7 @@ import (
 )
 
 type MongoSource struct {
-	Key         string   `json:"key" mapstructure:"key"`
+	Id          string   `json:"id" mapstructure:"id"`
 	DSN         string   `json:"dsn" mapstructure:"dsn"`
 	Collections []string `json:"collections" mapstructure:"collections"`
 	DB          string
@@ -47,7 +47,7 @@ func RegisterMongoSources(ctx context.Context, sources []*MongoSource) error {
 		source.DB = dbName
 		source.Client = client
 
-		registerSource(source.Key, source)
+		registerSource(source.Id, source)
 	}
 	return nil
 }
