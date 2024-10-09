@@ -24,7 +24,7 @@ default_cron = "0 3 * * * *"
 [[minio_sources]]
     id = "minio:blog"
     dsn = "minio://xxx:xxx@127.0.0.1:9000/blog-minio"
-    prefix = ["preview", "content"]
+    prefixes = ["preview", "content"]
 
 [[oss_targets]]
     id = "cos:hezebin:backup:mongo"

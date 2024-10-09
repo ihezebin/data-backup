@@ -105,6 +105,9 @@ func initComponents(ctx context.Context, conf *config.Config) error {
 	if err := source.RegisterMysqlSources(ctx, conf.MysqlSources); err != nil {
 		return errors.Wrap(err, "init mongo sources error")
 	}
+	if err := source.RegisterMinioSources(ctx, conf.MinioSources); err != nil {
+		return errors.Wrap(err, "init mongo sources error")
+	}
 
 	// init targets
 	if err := target.RegisterOSSTargets(ctx, conf.OSSTargets); err != nil {

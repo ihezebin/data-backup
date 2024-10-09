@@ -21,6 +21,7 @@ type Config struct {
 	Email        *email.Config         `json:"email" mapstructure:"email"`
 	Pwd          string                `json:"-" mapstructure:"-"`
 	MongoSources []*source.MongoSource `json:"mongo_sources" mapstructure:"mongo_sources"`
+	MinioSources []*source.MinioSource `json:"minio_sources" mapstructure:"minio_sources"`
 	MysqlSources []*source.MysqlSource `json:"mysql_sources" mapstructure:"mysql_sources"`
 	OSSTargets   []*target.OSSTarget   `json:"oss_targets" mapstructure:"oss_targets"`
 	Tasks        []*task.Task          `json:"tasks" mapstructure:"tasks"`
