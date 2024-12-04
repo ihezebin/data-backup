@@ -32,7 +32,7 @@ func Run(ctx context.Context, port uint) error {
 		httpserver.WithLoggingResponse(false),
 		httpserver.WithMiddlewares(middleware.Cors()),
 		httpserver.WithRouters("",
-			handler.NewRestoreHandler(),
+			handler.NewTaskHandler(),
 			// ... other handlers
 		),
 	)
