@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/restore/login": {
+        "/task/restore": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -24,7 +24,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "restore"
+                    "task"
                 ],
                 "summary": "通过备份任务来恢复数据",
                 "parameters": [
@@ -34,7 +34,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.RestoreByTaskReq"
+                            "$ref": "#/definitions/dto.TaskRestoreReq"
                         }
                     }
                 ],
@@ -50,7 +50,52 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/dto.RestoreByTaskResp"
+                                            "$ref": "#/definitions/dto.TaskRestoreResp"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/task/trigger": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task"
+                ],
+                "summary": "主动触发任务",
+                "parameters": [
+                    {
+                        "description": "任务参数",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.TaskTriggerReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功时如下结构；错误时 code 非 0, message 包含错误信息, 不包含 data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/server.Body"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.TaskTriggerResp"
                                         }
                                     }
                                 }
@@ -62,7 +107,32 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dto.RestoreByTaskReq": {
+        "dto.TaskRestoreReq": {
+            "type": "object",
+            "properties": {
+                "task_id": {
+                    "type": "string"
+                },
+                "task_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "dto.TaskRestoreResp": {
+            "type": "object",
+            "properties": {
+                "tasks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/task.Task"
+                    }
+                }
+            }
+        },
+        "dto.TaskTriggerReq": {
             "type": "object",
             "properties": {
                 "task_id": {
@@ -70,7 +140,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.RestoreByTaskResp": {
+        "dto.TaskTriggerResp": {
             "type": "object",
             "properties": {
                 "task": {

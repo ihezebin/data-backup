@@ -1,11 +1,27 @@
 basePath: /
 definitions:
-  dto.RestoreByTaskReq:
+  dto.TaskRestoreReq:
+    properties:
+      task_id:
+        type: string
+      task_ids:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.TaskRestoreResp:
+    properties:
+      tasks:
+        items:
+          $ref: '#/definitions/task.Task'
+        type: array
+    type: object
+  dto.TaskTriggerReq:
     properties:
       task_id:
         type: string
     type: object
-  dto.RestoreByTaskResp:
+  dto.TaskTriggerResp:
     properties:
       task:
         $ref: '#/definitions/task.Task'
@@ -38,7 +54,7 @@ info:
   title: Go Template DDD 示例 API 文档
   version: "1.0"
 paths:
-  /restore/login:
+  /task/restore:
     post:
       consumes:
       - application/json
@@ -48,7 +64,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/dto.RestoreByTaskReq'
+          $ref: '#/definitions/dto.TaskRestoreReq'
       produces:
       - application/json
       responses:
@@ -59,9 +75,35 @@ paths:
             - $ref: '#/definitions/server.Body'
             - properties:
                 data:
-                  $ref: '#/definitions/dto.RestoreByTaskResp'
+                  $ref: '#/definitions/dto.TaskRestoreResp'
               type: object
       summary: 通过备份任务来恢复数据
       tags:
-      - restore
+      - task
+  /task/trigger:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务参数
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TaskTriggerReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时如下结构；错误时 code 非 0, message 包含错误信息, 不包含 data
+          schema:
+            allOf:
+            - $ref: '#/definitions/server.Body'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.TaskTriggerResp'
+              type: object
+      summary: 主动触发任务
+      tags:
+      - task
 swagger: "2.0"
