@@ -5,6 +5,7 @@ import (
 	"data-backup/component/email"
 	"data-backup/component/task"
 	"data-backup/config"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -19,6 +20,7 @@ func Run(ctx context.Context) error {
 
 	tasks := task.GetTasks()
 	for _, _task := range tasks {
+		taskData, _ := json.Marshal(_task)
 		if _, err := c.AddFunc(_task.Cron, func() {
 			var err error
 			defer func() {
@@ -30,20 +32,20 @@ func Run(ctx context.Context) error {
 				}
 			}()
 
-			logger.Infof(ctx, "task start, task: %+v", _task)
+			logger.Infof(ctx, "task start, task: %s", taskData)
 
 			err = _task.Source.Backup(ctx, _task.Target)
 			if err != nil {
-				err = errors.Wrapf(err, "source backup error, task: %+v", _task)
+				err = errors.Wrapf(err, "source backup error, task: %s", taskData)
 				return
 			}
 
-			logger.Infof(ctx, "task success, task: %+v", _task)
+			logger.Infof(ctx, "task success, task: %s", taskData)
 		}); err != nil {
 			return errors.Wrapf(err, "add cron job error, task: %+v", _task)
 		}
 
-		logger.Infof(ctx, "register task cron job, task: %+v", _task)
+		logger.Infof(ctx, "register task cron job, task: %s", taskData)
 	}
 
 	c.Start()
